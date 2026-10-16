@@ -1,4 +1,4 @@
-# How we build veridle
+# How we build this project
 
 Last updated: <release>, <date>
 

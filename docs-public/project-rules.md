@@ -1,4 +1,4 @@
-# Project rules — veridle
+# Project rules
 
 <!-- scaffolder-Opus5.5-agent, 2026-10-16 -->
 
