@@ -1,16 +1,4 @@
-# How we build <project name>
-
-<!-- kit-keeper-Opus5.5-agent, 2026-10-16 (KIT-003). Template.
-     Copy to docs-public/how-we-build.md at scaffold; fill it in at the first
-     release (start-here, "Per release: harden and tell", step T) and update
-     its numbers each release.
-     It describes the method in general: the stages, the roles, the gates and
-     what was tried against them. It does not copy role files, review rules or
-     prompts, and it names no way past a check; a reader learns that a gate
-     exists and what it refuses, not how it decides.
-     It is public: state each practice and its technical reason, never why
-     the kit asks for it or anything about the owner as a person
-     (docs/rules/content-rules.md section 4). -->
+# How we build veridle
 
 Last updated: <release>, <date>
 

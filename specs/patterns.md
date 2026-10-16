@@ -1,12 +1,5 @@
 # Shared patterns
 
-<!-- kit-keeper-Opus5.5-agent, 2026-10-13. Template for specs/patterns.md,
-     created by the scaffold (README-SCAFFOLD-NEW-PROJECT.md, Step 3). The UX
-     designer owns it (docs/agents/ux-designer.md, "The shared pattern list"):
-     one entry per pattern, written once; a slice's screen rules point at a
-     pattern instead of restating it. Delete entries that don't apply to this
-     project's stack; remove this comment once the first real entry lands. -->
-
 PATTERN: Command-line error
 RULE:    One line on standard error per problem: `<command>: ` then what
          happened, then what to do, under 80 characters. A usage line may
