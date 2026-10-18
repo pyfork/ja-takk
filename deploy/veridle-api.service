@@ -1,0 +1,33 @@
+[Unit]
+Description=veridle.com sign-in API (always rejects; rate limited)
+After=network.target
+
+[Service]
+User=veridle-api
+Group=veridle-api
+ExecStart=/sites/veridle.com/app/veridle-api
+Environment=LISTEN_ADDR=127.0.0.1:8793
+Restart=on-failure
+RestartSec=2
+# Small by design: it only counts attempts. Keeps a flood from hurting the host.
+MemoryMax=64M
+TasksMax=64
+LimitNOFILE=1024
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_INET AF_INET6
+RestrictNamespaces=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+CapabilityBoundingSet=
+SystemCallFilter=@system-service
+SystemCallArchitectures=native
+
+[Install]
+WantedBy=multi-user.target

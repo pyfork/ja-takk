@@ -1,0 +1,96 @@
+# veridle.com — Puascari Property Group landing page (static) + sign-in API (Go, loopback).
+# Answers Cloudflare only (direct hits dropped with 444),
+# TLS params + real client IP come from the global include files.
+# Layout: /sites/veridle.com/www (static, root-owned)  ·  /sites/veridle.com/app/veridle-api (Go, :8793)
+
+# Zones are prefixed veridle_.
+# 6 requests/min/IP (burst 8) on the sign-in endpoint: a flood guard only. The Go service additionally locks an IP for
+# 60 min after 5 attempts and enforces a box-wide ceiling).
+limit_req_zone  $binary_remote_addr zone=veridle_signin:1m rate=6r/m;
+limit_conn_zone $binary_remote_addr zone=veridle_conn:1m;
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name veridle.com www.veridle.com;
+    include /etc/nginx/global/well-known.conf;
+    location / { return 301 https://veridle.com$request_uri; }
+}
+
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    http2 on;
+    server_name veridle.com www.veridle.com;
+    include /etc/nginx/snippets/cloudflare-only.conf;
+
+    ssl_certificate     /etc/letsencrypt/live/veridle.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/veridle.com/privkey.pem;
+    include /etc/nginx/global/ssl-params.conf;
+
+    server_tokens off;
+    root /sites/veridle.com/www;
+    index index.html;
+    client_max_body_size 4k;
+    limit_conn veridle_conn 20;
+
+    if ($host = www.veridle.com) { return 301 https://veridle.com$request_uri; }
+
+    # Security headers. Locations below use `expires` (not add_header) so these stay inherited;
+    # the two that set Cache-Control include the snippet again.
+    include /etc/nginx/snippets/veridle-headers.conf;
+
+    include /etc/nginx/global/well-known.conf;
+
+    # --- pages (no-cache so a deploy shows up immediately) ---
+    location = /            { try_files /index.html =404;         default_type text/html; expires -1; }
+    location = /ms          { return 301 /ms/; }
+    location = /ms/         { try_files /ms/index.html =404;      default_type text/html; expires -1; }
+    location = /signin      { try_files /signin.html =404;        default_type text/html; expires -1; add_header X-Robots-Tag "noindex, nofollow" always; include /etc/nginx/snippets/veridle-headers.conf; }
+    location = /terms-privacy      { try_files /terms-privacy.html =404;      default_type text/html; expires -1; }
+    location = /ms/terma-privasi   { try_files /ms/terma-privasi.html =404;   default_type text/html; expires -1; }
+    location = /ms/log-masuk { try_files /ms/log-masuk.html =404; default_type text/html; expires -1; add_header X-Robots-Tag "noindex, nofollow" always; include /etc/nginx/snippets/veridle-headers.conf; }
+
+    # --- sign-in API: POST only, tight rate limit, proxied to the loopback Go service ---
+    location = /api/signin {
+        limit_except POST { deny all; }
+        limit_req zone=veridle_signin burst=8 nodelay;
+        proxy_pass http://127.0.0.1:8793;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;      # CF-Connecting-IP, restored by cloudflare-real-ip.conf
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header Connection "";
+        proxy_connect_timeout 3s;
+        proxy_read_timeout 10s;
+        add_header X-Robots-Tag "noindex, nofollow" always;
+        add_header Cache-Control "no-store" always;
+        include /etc/nginx/snippets/veridle-headers.conf;
+    }
+
+    # --- hashed assets: cache for a year ---
+    location /assets/ {
+        try_files $uri =404;
+        add_header Cache-Control "public, max-age=31536000, immutable" always;
+        include /etc/nginx/snippets/veridle-headers.conf;
+        access_log off;
+    }
+
+    # --- crawl + brand files ---
+    location = /robots.txt  { default_type text/plain;      try_files $uri =404; expires 1h; }
+    location = /sitemap.xml { default_type application/xml; try_files $uri =404; expires 1h; }
+    location ~ ^/(manifest\.webmanifest|favicon\.ico|favicon\.svg|apple-touch-icon\.png|icon-512\.png|og\.png)$ {
+        try_files $uri =404;
+        expires 7d;
+    }
+
+    error_page 404 /404.html;
+    location = /404.html { internal; }
+
+    # --- RFC 9116 security contact. The file exists only when the build was given VERIDLE_SECURITY_CONTACT;
+    # otherwise this is a plain 404. Exact match beats the dotfile regex below. ---
+    location = /.well-known/security.txt { alias /sites/veridle.com/www/security.txt; default_type text/plain; charset utf-8; expires 1d; }
+
+    location ~ /\. { return 404; }
+    location /       { return 404; }
+}
