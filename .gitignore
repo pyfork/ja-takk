@@ -127,6 +127,9 @@ dist/
 build/
 out/
 
+# Merge/patch backups
+*.orig
+
 # IDE
 .idea/
 *.iml
