@@ -6,8 +6,18 @@ import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { Resvg } from '@resvg/resvg-js';
 import { SITE, en } from './content.mjs';
-import { ms } from './content.ms.mjs'; // BM copy: gitignored, not tracked
 import { legalEn, legalMs, UPDATED, CONTACT } from './legal.mjs';
+// BM copy: content.ms.mjs is gitignored (owner's choice). A fresh clone or CI has only the tracked
+// placeholder, content.ms.example.mjs, and must ask for it with BM_PLACEHOLDER=1, so a deploy can
+// never ship placeholder copy by accident. kit-keeper-Opus5.5-agent, 2026-10-19
+const bmReal = fs.existsSync(new URL('./content.ms.mjs', import.meta.url));
+if (!bmReal && process.env.BM_PLACEHOLDER !== '1') {
+  console.error('site/content.ms.mjs is missing (BM copy, kept out of git).\n' +
+    'Restore it from the owner, or build with placeholder BM copy: BM_PLACEHOLDER=1 node build.mjs');
+  process.exit(1);
+}
+const { ms } = await import(bmReal ? './content.ms.mjs' : './content.ms.example.mjs');
+if (!bmReal) console.warn('WARNING: BM pages built from placeholder copy (content.ms.example.mjs). Do not deploy this build.');
 // Terms & Privacy in both languages: PDPA s.7(3) requires the notice in BM and English.
 const legalOf = (t) => (t.lang === 'en' ? legalEn : legalMs);
 
