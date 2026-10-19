@@ -10,7 +10,7 @@ import (
 // limiter allows `max` sign-in attempts per client, then refuses to process
 // anything from that client for `lockFor`. Attempts made while locked are not
 // processed and do not extend the lock. A global ceiling and a hard cap on the
-// number of tracked clients protect the shared box from floods that spread
+// number of tracked clients protect the host from floods that spread
 // across many addresses.
 type limiter struct {
 	mu        sync.Mutex

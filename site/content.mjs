@@ -1,4 +1,4 @@
-// All page copy. Source: docs/spikes/veridle.com/concept-3-rumah.html.
+// All page copy.
 // CTAs that said "Start free" / "Book a demo" etc. now say "Sign in" because every CTA goes to the
 // sign-in page (there is no registration yet). "See how it works" stays an in-page anchor.
 // The BM page lives in content.ms.mjs (gitignored, not tracked).
