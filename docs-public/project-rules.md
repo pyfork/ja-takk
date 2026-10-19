@@ -12,4 +12,4 @@ React and TypeScript with Vite: `docs/rules/stacks/react-vite.md`. See ADR-001. 
 Both: a landing page with sign-up, and an API with storage.
 
 ## Deploy
-Manual, `deploy/deploy.sh`. Flow rule 4 (deploy on every merge to `main`) does not apply until an ADR decides it.
+Manual, `deploy/deploy.sh`. First copy `deploy/.env.example` to `deploy/.env` (git-ignored) and set `VERIDLE_HOST` to your SSH alias for the server. Flow rule 4 (deploy on every merge to `main`) does not apply until an ADR decides it.
