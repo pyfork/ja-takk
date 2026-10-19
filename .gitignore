@@ -145,3 +145,6 @@ uploads/
 docs/
 
 README-HANDOFF-*
+
+# Deploy files live in the private infra repo
+deploy/
